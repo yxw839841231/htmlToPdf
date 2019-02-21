@@ -52,50 +52,50 @@ import com.itextpdf.tool.xml.svg.tags.Graphic;
 
 
 public class Rectangle extends Graphic {
-	float x, y, width, height, rx, ry;
-	
-	public float getX() {
-		return x;
-	}
+    float x, y, width, height, rx, ry;
 
-	public float getY() {
-		return y;
-	}
+    public float getX() {
+        return x;
+    }
 
-	public float getWidth() {
-		return width;
-	}
+    public float getY() {
+        return y;
+    }
 
-	public float getHeight() {
-		return height;
-	}
+    public float getWidth() {
+        return width;
+    }
 
-	public float getRx() {
-		return rx;
-	}
+    public float getHeight() {
+        return height;
+    }
 
-	public float getRy() {
-		return ry;
-	}
+    public float getRx() {
+        return rx;
+    }
 
-	public Rectangle(float x, float y, float width, float height, float rx, float ry, Map<String, String> css){
-		super(css);
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.rx = rx;
-		this.ry = ry;
-	}	
+    public float getRy() {
+        return ry;
+    }
 
-	@Override
-	public void draw(PdfContentByte cb) {
-		//TODO check the line width with this rectangles SVG takes 5 pixel out and 5 pixels in when asking line-width=10
-		//TODO check the values for rx and ry what if they get to big
-		
-		if(rx == 0 || ry == 0){
-			cb.rectangle(x, y, width, height);
-		}else{ //corners
+    public Rectangle(float x, float y, float width, float height, float rx, float ry, Map<String, String> css) {
+        super(css);
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.rx = rx;
+        this.ry = ry;
+    }
+
+    @Override
+    public void draw(PdfContentByte cb) {
+        //TODO check the line width with this rectangles SVG takes 5 pixel out and 5 pixels in when asking line-width=10
+        //TODO check the values for rx and ry what if they get to big
+
+        if (rx == 0 || ry == 0) {
+            cb.rectangle(x, y, width, height);
+        } else { //corners
 			/*
 			
 			if(rx > x / 2){
@@ -103,32 +103,33 @@ public class Rectangle extends Graphic {
 			}
 			if(ry > y / 2){
 				ry = y/2;
-			}*/			
-			
-			cb.moveTo(x + rx, y);
-			cb.lineTo(x + width - rx, y);
-			arc(x + width - 2 * rx, y, x + width, y + 2 * ry, -90, 90, cb);
-			cb.lineTo(x + width, y + height - ry);
-			arc(x + width, y + height - 2 * ry, x + width - 2 * rx, y + height, 0, 90, cb);
-			cb.lineTo(x + rx, y + height);			
-			arc(x + 2 * rx, y + height, x, y + height - 2 * ry, 90, 90, cb);
-			cb.lineTo(x, y + ry);
-			arc(x, y + 2 * ry, x + 2 * rx, y, 180, 90, cb);
-			cb.closePath();
-		}
-		
-	}
-		
-	//copied this because of the moveTo
+			}*/
+
+            cb.moveTo(x + rx, y);
+            cb.lineTo(x + width - rx, y);
+            arc(x + width - 2 * rx, y, x + width, y + 2 * ry, -90, 90, cb);
+            cb.lineTo(x + width, y + height - ry);
+            arc(x + width, y + height - 2 * ry, x + width - 2 * rx, y + height, 0, 90, cb);
+            cb.lineTo(x + rx, y + height);
+            arc(x + 2 * rx, y + height, x, y + height - 2 * ry, 90, 90, cb);
+            cb.lineTo(x, y + ry);
+            arc(x, y + 2 * ry, x + 2 * rx, y, 180, 90, cb);
+            cb.closePath();
+        }
+
+    }
+
+    //copied this because of the moveTo
     public void arc(final float x1, final float y1, final float x2, final float y2, final float startAng, final float extent, PdfContentByte cb) {
-        ArrayList<float[]> ar = PdfContentByte.bezierArc(x1, y1, x2, y2, startAng, extent);
-        if (ar.isEmpty())
+        ArrayList<double[]> ar = PdfContentByte.bezierArc(x1, y1, x2, y2, startAng, extent);
+        if (ar.isEmpty()) {
             return;
-        float pt[] = ar.get(0);
+        }
+        double pt[] = ar.get(0);
         //moveTo(pt[0], pt[1]);
         for (int k = 0; k < ar.size(); ++k) {
             pt = ar.get(k);
             cb.curveTo(pt[2], pt[3], pt[4], pt[5], pt[6], pt[7]);
         }
-    }	
+    }
 }

@@ -79,7 +79,7 @@ public class TextPathGroup extends Graphic {
 		draw(cb, pathToLineSegment(), list);
 	}
 	
-    public void draw(PdfContentByte cb, List<float[]> lines, List<Element> list) throws Exception{
+    public void draw(PdfContentByte cb, List<double[]> lines, List<Element> list) throws Exception{
     	if(lines.size() < 2){
     		return; //Do nothing
     	}  
@@ -90,7 +90,7 @@ public class TextPathGroup extends Graphic {
     	BaseFont bf = BaseFont.createFont("c:/windows/fonts/arial.ttf", BaseFont.WINANSI, BaseFont.EMBEDDED);    	
     	cb.setFontAndSize(bf, fontsize);
 
-    	float xPrevious = lines.get(0)[0], yPrevious = lines.get(0)[1];  
+		double xPrevious = lines.get(0)[0], yPrevious = lines.get(0)[1];
     	int indexOfTextElement = 0, indexOfCharacter = 0;
     	
        	String currentCharacter = getCharacter(indexOfTextElement, indexOfCharacter);    	
@@ -113,8 +113,8 @@ public class TextPathGroup extends Graphic {
     	boolean lookForStart = true;
     	
     	for (int j = 1; j < lines.size(); j++) {
-			    		
-    		float[] point = lines.get(j);
+
+			double[] point = lines.get(j);
         	
         	double lengthLijnStuk = calculateDistance(xPrevious, yPrevious, point[0], point[1]);
         	//System.out.println(lengthLijnStuk);
@@ -184,7 +184,7 @@ public class TextPathGroup extends Graphic {
 		}
     }
     
-    private void showText(PdfContentByte cb, float x, float y, float xPrevious, float yPrevious, double xmidden, double ymidden, String character) throws Exception{
+    private void showText(PdfContentByte cb, double x, double y, double xPrevious, double yPrevious, double xmidden, double ymidden, String character) throws Exception{
     	double corner = calculateCorner(x, y, xPrevious, yPrevious);
     	cb.saveState();
     	PdfTemplate template2 = cb.createTemplate(1000, 1000);    	
@@ -226,7 +226,7 @@ public class TextPathGroup extends Graphic {
 		return 0;
 	}    
     
-    private double[] getPointOnLine(float x1, float y1, float x2, float y2, double length){
+    private double[] getPointOnLine(double x1, double y1, double x2, double y2, double length){
     	double corner = calculateCorner(x2, y2, x1, y1);
     	//System.out.println(corner);
     	double rad = Math.toRadians(corner);
@@ -236,22 +236,22 @@ public class TextPathGroup extends Graphic {
     	return result;
     }
     
-    private double calculateDistance(float x1, float y1, float x2, float y2){
+    private double calculateDistance(double x1, double y1, double x2, double y2){
     	return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }  
     
-    private List<float[]> pathToLineSegment(){
+    private List<double[]> pathToLineSegment(){
     	return pathToLineSegment(path.getTranslatedPathItems());
     }
     
-    private List<float[]> pathToLineSegment(List<PathItem> pathItems){
-    	List<float[]> coordinates = new ArrayList<float[]>();
+    private List<double[]> pathToLineSegment(List<PathItem> pathItems){
+    	List<double[]> coordinates = new ArrayList<double[]>();
     	
 		for (PathItem item : pathItems) {
 			List<Float> numbers = item.getCoordinates();
 
 			if(item.isMoveTo() || item.isLineTo()){
-				float[] point = new float[2];
+				double[] point = new double[2];
 				point[0] = numbers.get(0);
 				point[1] = numbers.get(1);
 				coordinates.add(point);
@@ -265,20 +265,22 @@ public class TextPathGroup extends Graphic {
     	return coordinates;
     }
     
-    private List<float[]> arcToLines(final PathItem item){
+    private List<double[]> arcToLines(final PathItem item){
     	List<Float> numbers = item.getCoordinates();
 		EllipseArc ellipse = EllipseArc.createEllipseArc(numbers.get(7), numbers.get(8), numbers.get(5), numbers.get(6), numbers.get(0), numbers.get(1), numbers.get(4), numbers.get(3));
 
-		List<float[]> newCoordinates = PdfContentByte.bezierArc(ellipse.getCx() - numbers.get(0), ellipse.getCy() - numbers.get(1), ellipse.getCx() + numbers.get(0), ellipse.getCy() + numbers.get(1),
+		List<double[]> newCoordinates = PdfContentByte.bezierArc(ellipse.getCx() - numbers.get(0), ellipse.getCy() - numbers.get(1), ellipse.getCx() + numbers.get(0), ellipse.getCy() + numbers.get(1),
 				ellipse.getStartAng(), ellipse.getExtend());
 		
-		List<float[]> result = new ArrayList<float[]>();
+		List<double[]> result = new ArrayList<double[]>();
 		
-        if (newCoordinates.isEmpty()) return result;
-           
-        float pt[] = newCoordinates.get(0);
-        float x0 = pt[0];
-        float y0 = pt[1];
+        if (newCoordinates.isEmpty()) {
+        	return result;
+		}
+
+		double pt[] = newCoordinates.get(0);
+		double x0 = pt[0];
+		double y0 = pt[1];
         
         for (int k = 0; k < newCoordinates.size(); ++k) {
             pt = newCoordinates.get(k);
@@ -289,12 +291,12 @@ public class TextPathGroup extends Graphic {
         return result;
     }
     
-    private List<float[]> bezierCurveToLines(final List<float[]> coordinates, final PathItem item){
+    private List<double[]> bezierCurveToLines(final List<double[]> coordinates, final PathItem item){
     	List<Float> numbers = item.getCoordinates();
-    	
-    	float start[] = coordinates.get(coordinates.size() - 1);
-    	float x0 = start[0];
-    	float y0 = start[1];
+
+		double start[] = coordinates.get(coordinates.size() - 1);
+		double x0 = start[0];
+		double y0 = start[1];
     	float x1 = numbers.get(0);
     	float y1 = numbers.get(1);
     	float x2 = numbers.get(2);
@@ -310,8 +312,8 @@ public class TextPathGroup extends Graphic {
     	return bezierCurveToLines(x0, y0, x1, y1, x2, y2, x3, y3, item.isCubicBezier());
     }
     
-    private List<float[]> bezierCurveToLines(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, boolean cubic){
-    	float A, B, C, D, E, F, G, H;
+    private List<double[]> bezierCurveToLines(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, boolean cubic){
+		double A, B, C, D, E, F, G, H;
     	
     	if(cubic){
            	A = x3 - 3 * x2 + 3 * x1 - x0;
@@ -334,10 +336,10 @@ public class TextPathGroup extends Graphic {
         	 H = y0;        	 
     	}
     	
-    	List<float[]> result = new ArrayList<float[]>();
-    	float step = 0.005f;
-    	for (float t = step; t <= 1; t += step) {
-    		float[] point = new float[2];
+    	List<double[]> result = new ArrayList<double[]>();
+		double step = 0.005f;
+    	for (double t = step; t <= 1; t += step) {
+			double[] point = new double[2];
     		point[0] = A * t * t * t + B * t * t + C * t + D;
     		point[1] = E * t * t * t + F * t * t + G * t + H;
     		result.add(point);
